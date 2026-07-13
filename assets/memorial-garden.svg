@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 820" role="img" aria-labelledby="title desc">
+  <title id="title">Peaceful memorial garden</title>
+  <desc id="desc">A stylized garden with trees, flowers, a pathway, and a cared-for memorial stone.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9efe9"/>
+      <stop offset="1" stop-color="#d7e3d8"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#789279"/>
+      <stop offset="1" stop-color="#415e4c"/>
+    </linearGradient>
+    <linearGradient id="stone" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e8e2d5"/>
+      <stop offset="1" stop-color="#bdb8ac"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="14" flood-color="#0d2a24" flood-opacity=".22"/>
+    </filter>
+  </defs>
+
+  <rect width="720" height="820" rx="46" fill="url(#sky)"/>
+  <circle cx="574" cy="128" r="62" fill="#f2dfb5" opacity=".8"/>
+  <path d="M0 298c120-52 232-52 356-10 120 41 236 40 364-14v546H0V298Z" fill="#9aae94"/>
+  <path d="M0 395c158-78 298-59 410-8 98 45 196 44 310-5v438H0V395Z" fill="url(#ground)"/>
+
+  <g opacity=".92">
+    <path d="M82 412V174" stroke="#53654f" stroke-width="22" stroke-linecap="round"/>
+    <circle cx="82" cy="138" r="95" fill="#5f775f"/>
+    <circle cx="32" cy="202" r="68" fill="#6e876d"/>
+    <circle cx="135" cy="202" r="74" fill="#6b8268"/>
+    <circle cx="76" cy="84" r="60" fill="#536f57"/>
+  </g>
+
+  <g opacity=".95">
+    <path d="M652 398V174" stroke="#4d614b" stroke-width="20" stroke-linecap="round"/>
+    <circle cx="652" cy="132" r="92" fill="#536f57"/>
+    <circle cx="602" cy="198" r="68" fill="#6c856b"/>
+    <circle cx="701" cy="194" r="66" fill="#637d63"/>
+  </g>
+
+  <path d="M245 820c-4-107 24-205 94-291 38-47 73-90 92-145 29 91 34 183 2 279-19 57-17 106 1 157H245Z" fill="#d9ccb3" opacity=".9"/>
+  <path d="M292 820c-3-96 20-184 80-261 35-44 62-85 75-127" fill="none" stroke="#c2af8d" stroke-width="6" opacity=".75"/>
+
+  <g filter="url(#shadow)">
+    <path d="M286 590v-148c0-71 48-128 107-128s107 57 107 128v148H286Z" fill="url(#stone)" stroke="#a19d93" stroke-width="4"/>
+    <rect x="266" y="584" width="254" height="38" rx="8" fill="#aaa69d"/>
+    <rect x="246" y="617" width="294" height="28" rx="7" fill="#8d8b85"/>
+    <path d="M393 377v118M342 436h102" fill="none" stroke="#8a877f" stroke-width="8" stroke-linecap="round"/>
+    <path d="M330 535h126" stroke="#97938a" stroke-width="5" stroke-linecap="round"/>
+    <path d="M351 555h84" stroke="#97938a" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <g>
+    <path d="M213 656c46-34 94-32 140 5-47 24-94 22-140-5Z" fill="#284a3b"/>
+    <path d="M407 661c41-35 87-36 137-4-46 27-92 28-137 4Z" fill="#2d503f"/>
+    <path d="M283 681c36-32 75-31 116 3-40 23-79 22-116-3Z" fill="#41694f"/>
+    <circle cx="254" cy="648" r="10" fill="#d9a4a0"/>
+    <circle cx="281" cy="667" r="11" fill="#f0d2a2"/>
+    <circle cx="326" cy="651" r="9" fill="#d0a0b1"/>
+    <circle cx="451" cy="650" r="10" fill="#e5bd83"/>
+    <circle cx="491" cy="669" r="11" fill="#d4a1a6"/>
+    <circle cx="524" cy="648" r="9" fill="#f0d2a2"/>
+  </g>
+
+  <g opacity=".85">
+    <circle cx="152" cy="541" r="11" fill="#f0d2a2"/>
+    <circle cx="181" cy="564" r="8" fill="#d6a1ad"/>
+    <circle cx="590" cy="538" r="10" fill="#f0d2a2"/>
+    <circle cx="617" cy="561" r="8" fill="#d9a4a0"/>
+  </g>
+
+  <path d="M44 748c84-28 153-22 226 16M512 758c60-22 110-19 164 2" fill="none" stroke="#36563f" stroke-width="12" stroke-linecap="round" opacity=".72"/>
+  <rect x="1.5" y="1.5" width="717" height="817" rx="44" fill="none" stroke="#ffffff" stroke-opacity=".48" stroke-width="3"/>
+</svg>
