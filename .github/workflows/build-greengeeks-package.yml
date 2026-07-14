@@ -1,0 +1,115 @@
+name: Build GreenGeeks deployment package
+
+on:
+  push:
+    branches:
+      - forms/email-routing-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+          coverage: none
+
+      - name: Validate PHP and JavaScript
+        run: |
+          composer validate --no-check-publish
+          find api tests -name '*.php' -print0 | xargs -0 -n1 php -l
+          node --check script.js
+          php tests/form-core-test.php
+
+      - name: Install production mail dependency
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
+      - name: Assemble one-extraction GreenGeeks package
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="$RUNNER_TEMP/wtr-package"
+          SITE="$ROOT/public_html/wheretheyrest"
+          PRIVATE="$ROOT/wheretheyrest-private"
+
+          mkdir -p "$SITE/api" "$SITE/assets" "$PRIVATE/rate-limits"
+
+          cp index.html styles.css script.js 404.html .htaccess composer.json "$SITE/"
+          if [ -f composer.lock ]; then cp composer.lock "$SITE/"; fi
+          cp -R api/. "$SITE/api/"
+          cp -R assets/. "$SITE/assets/"
+          cp -R vendor "$SITE/vendor"
+
+          cat > "$PRIVATE/mail.php" <<'PHP'
+          <?php
+
+          declare(strict_types=1);
+
+          return [
+              'smtp' => [
+                  'host' => 'mail.wheretheyrest.ca',
+                  'port' => 465,
+                  'encryption' => 'ssl',
+                  'username' => 'care@wheretheyrest.ca',
+                  'password' => 'REPLACE_WITH_CARE_EMAIL_PASSWORD',
+              ],
+              'sender' => [
+                  'email' => 'care@wheretheyrest.ca',
+                  'name' => 'Where They Rest Website',
+              ],
+              'recipients' => [
+                  'care' => 'care@wheretheyrest.ca',
+                  'hello' => 'hello@wheretheyrest.ca',
+                  'stewards' => 'stewards@wheretheyrest.ca',
+              ],
+              'rate_limit' => [
+                  'max_submissions' => 5,
+                  'window_seconds' => 900,
+                  'directory' => __DIR__ . '/rate-limits',
+                  'salt' => 'f7K2mP9xR4vN8qL3wC6tY1sH5bD0gJ7zA2eU9iM4',
+              ],
+          ];
+          PHP
+
+          cat > "$ROOT/INSTALL-FIRST.txt" <<'TXT'
+          WHERE THEY REST — GREENGEEKS INSTALLATION
+
+          1. In cPanel File Manager, open your account HOME folder — the folder that contains public_html.
+          2. Upload this ZIP there and choose Extract.
+          3. The extraction creates:
+               public_html/wheretheyrest
+               wheretheyrest-private
+          4. Open wheretheyrest-private/mail.php with the cPanel editor.
+          5. Replace only REPLACE_WITH_CARE_EMAIL_PASSWORD with the password for care@wheretheyrest.ca.
+          6. Save the file. Never send or screenshot that password.
+          7. Visit the website and submit one test for care, steward, and general inquiry routing.
+
+          SMTP settings already included:
+          mail.wheretheyrest.ca | port 465 | SSL | care@wheretheyrest.ca
+
+          PHPMailer is already bundled. No Composer or terminal command is required.
+          TXT
+
+          touch "$PRIVATE/rate-limits/.keep"
+          chmod 750 "$PRIVATE" "$PRIVATE/rate-limits"
+          chmod 640 "$PRIVATE/mail.php"
+
+          cd "$ROOT"
+          zip -r "$GITHUB_WORKSPACE/wheretheyrest-greengeeks-ready.zip" .
+
+      - name: Upload complete deployment ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheretheyrest-greengeeks-ready
+          path: wheretheyrest-greengeeks-ready.zip
+          if-no-files-found: error
+          retention-days: 30
