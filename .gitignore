@@ -1,0 +1,6 @@
+/vendor/
+/config/mail.local.php
+/config/mail.php
+/wheretheyrest-private/
+*.log
+.DS_Store
