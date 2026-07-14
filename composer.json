@@ -1,0 +1,13 @@
+{
+  "name": "where-they-rest/website",
+  "description": "Where They Rest memorial-care website and secure request form.",
+  "type": "project",
+  "require": {
+    "php": ">=8.1",
+    "phpmailer/phpmailer": "^6.9"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  }
+}
