@@ -1,0 +1,11 @@
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^(?:config|tests|vendor)(?:/|$) - [F,L,NC]
+</IfModule>
+
+<FilesMatch "^(?:composer\.(?:json|lock)|README\.md|\.gitignore)$">
+  Require all denied
+</FilesMatch>
