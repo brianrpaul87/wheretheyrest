@@ -1,0 +1,110 @@
+from pathlib import Path
+
+index = Path('index.html')
+text = index.read_text(encoding='utf-8')
+
+old_hero = '''      <div class="hero-visual" aria-label="Illustrative side-by-side example of a grave memorial before and after careful cleaning">
+        <img src="assets/grave-memorial-cleaning-before-after.jpg?v=20260911" alt="Illustrative side-by-side example of a cemetery memorial before and after careful cleaning">
+        <div class="report-card"><span class="report-icon" aria-hidden="true">✓</span><div><strong>Visit complete</strong><span>Photos and care notes delivered</span></div></div>
+      </div>'''
+new_hero = '''      <div class="hero-visual hero-photo-compare" aria-label="Illustrative before and after example of memorial care">
+        <figure class="comparison-photo">
+          <img src="assets/memorial-care-before.webp?v=20260911" alt="Illustrative before view of a weathered granite cemetery memorial">
+          <figcaption>Before</figcaption>
+        </figure>
+        <figure class="comparison-photo">
+          <img src="assets/memorial-care-after.webp?v=20260911" alt="Illustrative after view of the same granite cemetery memorial following careful cleaning">
+          <figcaption>After</figcaption>
+        </figure>
+        <div class="report-card"><span class="report-icon" aria-hidden="true">✓</span><div><strong>Illustrative sample</strong><span>Real visits are photo documented</span></div></div>
+      </div>'''
+if old_hero not in text:
+    raise SystemExit('Expected hero visual block not found')
+text = text.replace(old_hero, new_hero, 1)
+
+old_header = '<span class="mini-label">Care report</span><strong>Seasonal memorial visit</strong>'
+new_header = '<span class="mini-label">Sample care report</span><strong>Illustrative memorial visit</strong>'
+if old_header not in text:
+    raise SystemExit('Expected report header not found')
+text = text.replace(old_header, new_header, 1)
+
+old_photos = '<div class="photo-grid" aria-hidden="true"><div class="photo-placeholder before"><span>Before</span></div><div class="photo-placeholder after"><span>After</span></div></div>'
+new_photos = '''<div class="photo-grid sample-photo-grid">
+          <figure class="sample-photo"><img src="assets/memorial-care-before.webp?v=20260911" alt="Illustrative before view of a weathered granite cemetery memorial"><figcaption>Before</figcaption></figure>
+          <figure class="sample-photo"><img src="assets/memorial-care-after.webp?v=20260911" alt="Illustrative after view of the same granite cemetery memorial following careful cleaning"><figcaption>After</figcaption></figure>
+        </div>
+        <p class="sample-disclosure">Illustrative sample only. Completed customer visits use photographs of the actual memorial.</p>'''
+if old_photos not in text:
+    raise SystemExit('Expected illustrated report photo grid not found')
+text = text.replace(old_photos, new_photos, 1)
+index.write_text(text, encoding='utf-8')
+
+css = Path('trust.css')
+styles = css.read_text(encoding='utf-8')
+marker = '/* realistic memorial comparison */'
+if marker not in styles:
+    styles += '''
+
+/* realistic memorial comparison */
+.hero-photo-compare{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  align-items:stretch;
+}
+.hero-photo-compare .comparison-photo,
+.sample-photo{
+  position:relative;
+  margin:0;
+  overflow:hidden;
+  border-radius:18px;
+  background:#d8d2c4;
+}
+.hero-photo-compare .comparison-photo img{
+  width:100%;
+  height:100%;
+  min-height:360px;
+  object-fit:cover;
+  display:block;
+}
+.comparison-photo figcaption,
+.sample-photo figcaption{
+  position:absolute;
+  left:12px;
+  bottom:12px;
+  z-index:2;
+  padding:5px 10px;
+  color:#fff;
+  background:rgba(13,42,36,.86);
+  border-radius:999px;
+  font-size:.72rem;
+  font-weight:900;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.hero-photo-compare .report-card{
+  grid-column:1/-1;
+  right:18px;
+  bottom:18px;
+}
+.sample-photo-grid{
+  align-items:stretch;
+}
+.sample-photo img{
+  width:100%;
+  height:260px;
+  object-fit:cover;
+  display:block;
+}
+.sample-disclosure{
+  margin:10px 2px 0;
+  color:var(--stone);
+  font-size:.72rem;
+  line-height:1.45;
+}
+@media (max-width:680px){
+  .hero-photo-compare .comparison-photo img{min-height:260px}
+  .sample-photo img{height:220px}
+}
+'''
+css.write_text(styles, encoding='utf-8')
