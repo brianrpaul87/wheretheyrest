@@ -1,0 +1,115 @@
+name: Add WTR remembrance service
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/add-remembrance-service.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Update homepage and Greater Victoria page
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected exactly one match, found {count}: {old[:100]}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          # Homepage: service card
+          replace_once(
+              'index.html',
+              '<article class="service-card"><span class="service-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 40V21m0 6c-8 0-13-5-13-12 8 0 13 5 13 12Zm0-5c8 0 13-5 13-12-8 0-13 5-13 12ZM16 40h16"/></svg></span><h3>Flowers and tributes</h3><p>Placement of approved fresh or seasonal flowers, wreaths, and meaningful family-provided tributes.</p></article>',
+              '<article class="service-card"><span class="service-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 40V21m0 6c-8 0-13-5-13-12 8 0 13 5 13 12Zm0-5c8 0 13-5 13-12-8 0-13 5-13 12ZM16 40h16"/></svg></span><h3>Special Occasion &amp; Remembrance Visits</h3><p>Mark a birthday, anniversary, holiday, memorial date, or other meaningful day with approved flowers, photographs, cards, or personal tributes placed on your behalf and documented for you afterward.</p></article>'
+          )
+
+          # Homepage: pricing card
+          replace_once(
+              'index.html',
+              '<article class="plan-card featured"><span class="plan-label">From $199 CAD</span><h3>Memorial Care Visit</h3><p>A documented visit that can include eligible, material-appropriate memorial cleaning where permitted.</p><ul><li>Memorial and cemetery review</li><li>Approved care completed</li><li>Before-and-after care report</li></ul></article>\n        <article class="plan-card"><span class="plan-label">From $549 CAD / year</span><h3>Seasonal Care</h3><p>Four recurring documented visits scheduled across the year and around meaningful family dates.</p><ul><li>Four planned visits</li><li>Permitted light tending</li><li>Report after every visit</li></ul></article>',
+              '<article class="plan-card featured"><span class="plan-label">From $199 CAD</span><h3>Memorial Care Visit</h3><p>A documented visit that can include eligible, material-appropriate memorial cleaning where permitted.</p><ul><li>Memorial and cemetery review</li><li>Approved care completed</li><li>Before-and-after care report</li></ul></article>\n        <article class="plan-card"><span class="plan-label">From $149 CAD + tribute</span><h3>Special Occasion &amp; Remembrance Visit</h3><p>A documented visit for a birthday, anniversary, holiday, memorial date, or other meaningful occasion.</p><ul><li>Approved flowers, photographs, cards, or tribute placement</li><li>Permitted light tidying around the memorial</li><li>Photo update after placement</li></ul></article>\n        <article class="plan-card"><span class="plan-label">From $549 CAD / year</span><h3>Seasonal Care</h3><p>Four recurring documented visits scheduled across the year and around meaningful family dates.</p><ul><li>Four planned visits</li><li>Permitted light tending</li><li>Report after every visit</li></ul></article>'
+          )
+
+          # Homepage: FAQ
+          replace_once(
+              'index.html',
+              '<details><summary>Can I request a visit on a specific date?</summary><p>You can request a meaningful date, but timing depends on cemetery access, weather, local availability, and the agreed service window.</p></details>',
+              '<details><summary>Can I request a visit on a specific date?</summary><p>You can request a meaningful date, but timing depends on cemetery access, weather, local availability, and the agreed service window.</p></details>\n        <details><summary>Can you place flowers, photographs, or a card for a birthday or anniversary?</summary><p>Yes, where cemetery rules permit it. Special Occasion &amp; Remembrance Visits can include approved flowers, photographs, cards, or other personal tributes for birthdays, anniversaries, holidays, memorial dates, and other meaningful occasions. The requested items and any removal requirements are confirmed before the visit.</p></details>'
+          )
+
+          # Homepage: form option and placeholder
+          replace_once(
+              'index.html',
+              '<option value="flowers">Flower or tribute placement</option>',
+              '<option value="flowers">Special Occasion / Remembrance Visit</option>'
+          )
+          replace_once(
+              'index.html',
+              'whether you are considering a check-in, cleaning, flowers, or recurring care.',
+              'whether you are considering a check-in, cleaning, a birthday or remembrance visit, flowers, photographs, or recurring care.'
+          )
+
+          # Greater Victoria page: structured data service types
+          replace_once(
+              'grave-cleaning-memorial-care-victoria-bc.html',
+              '"serviceType": ["Memorial care","Grave cleaning","Cemetery visits","Flower placement","Memorial photo updates"]',
+              '"serviceType": ["Memorial care","Grave cleaning","Cemetery visits","Flower placement","Special occasion memorial visits","Memorial photo updates"]'
+          )
+
+          # Greater Victoria: local service card
+          replace_once(
+              'grave-cleaning-memorial-care-victoria-bc.html',
+              '<article class="service-card"><h3>Flowers and tributes</h3><p>Approved fresh or seasonal flowers, wreaths, or family-requested tributes can be placed and photographed, with the item cost confirmed in advance.</p></article>',
+              '<article class="service-card"><h3>Special Occasion &amp; Remembrance Visits</h3><p>For birthdays, anniversaries, holidays, memorial dates, or other meaningful occasions, approved flowers, photographs, cards, or personal tributes can be placed on your behalf and photographed afterward. From $149 CAD plus the approved flower or tribute cost.</p></article>'
+          )
+
+          # Greater Victoria: FAQ
+          replace_once(
+              'grave-cleaning-memorial-care-victoria-bc.html',
+              '<details><summary>Can you place flowers for an anniversary or birthday?</summary><p>Where cemetery rules permit the requested tribute, we can coordinate placement and provide a photo record. Flower or tribute costs are confirmed separately before purchase.</p></details>',
+              '<details><summary>Can you place flowers, photographs, or a card for an anniversary or birthday?</summary><p>Yes, where cemetery rules permit it. A Special Occasion &amp; Remembrance Visit can include approved flowers, photographs, cards, or other personal tributes, followed by a photo record for the family. The service starts at $149 CAD plus the approved flower or tribute cost, and any cemetery-specific removal requirements are confirmed before the visit.</p></details>'
+          )
+
+          # Greater Victoria: reinforce remote-family use case
+          replace_once(
+              'grave-cleaning-memorial-care-victoria-bc.html',
+              'Health, mobility, work, cost, and distance can all make cemetery visits difficult.',
+              'Health, mobility, work, cost, and distance can all make cemetery visits difficult. Birthdays, anniversaries, holidays, and memorial dates can still be marked thoughtfully even when the family cannot travel to Victoria.'
+          )
+
+      - name: Validate remembrance service changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'Special Occasion &amp; Remembrance Visits' index.html
+          grep -Fq 'From $149 CAD + tribute' index.html
+          grep -Fq 'Special Occasion / Remembrance Visit' index.html
+          grep -Fq 'photographs, or a card for a birthday or anniversary' index.html
+          grep -Fq 'Special Occasion &amp; Remembrance Visits' grave-cleaning-memorial-care-victoria-bc.html
+          grep -Fq 'From $149 CAD plus the approved flower or tribute cost' grave-cleaning-memorial-care-victoria-bc.html
+          grep -Fq 'Special occasion memorial visits' grave-cleaning-memorial-care-victoria-bc.html
+
+      - name: Commit remembrance service update
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html grave-cleaning-memorial-care-victoria-bc.html
+          git diff --cached --quiet && { echo 'No changes required.'; exit 0; }
+          git commit -m 'Add special occasion and remembrance visits'
+          git push
