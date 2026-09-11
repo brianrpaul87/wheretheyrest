@@ -12,13 +12,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#173d34">
-  <meta name="description" content="Grave cleaning and memorial care in Greater Victoria, BC. Arrange documented cemetery visits, flowers, photo updates, light tending, and eligible memorial cleaning from a distance.">
+  <meta name="description" content="Grave cleaning and memorial care in Greater Victoria, BC, with documented visits, flowers, photo updates, light tending and eligible cleaning.">
   <link rel="canonical" href="https://wheretheyrest.ca/grave-cleaning-memorial-care-victoria-bc.html">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Grave Cleaning & Memorial Care in Victoria BC | Where They Rest">
   <meta property="og:description" content="Arrange respectful, documented memorial visits in Greater Victoria when you cannot be there in person.">
   <meta property="og:url" content="https://wheretheyrest.ca/grave-cleaning-memorial-care-victoria-bc.html">
-  <title>Grave Cleaning & Memorial Care in Victoria BC | Where They Rest</title>
+  <title>Grave Cleaning & Memorial Care Victoria BC | Where They Rest</title>
   <link rel="icon" href="assets/logo-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="trust.css">
@@ -29,15 +29,17 @@
     "@graph": [
       {
         "@type": "Organization",
+        "@id": "https://wheretheyrest.ca/#organization",
         "name": "Where They Rest Memorial Care",
         "url": "https://wheretheyrest.ca/",
+        "logo": "https://wheretheyrest.ca/assets/logo-mark.svg",
         "email": "hello@wheretheyrest.ca",
         "telephone": "+1-778-561-1007"
       },
       {
         "@type": "Service",
         "name": "Grave Cleaning and Memorial Care in Greater Victoria",
-        "provider": {"@type":"Organization","name":"Where They Rest Memorial Care"},
+        "provider": {"@id":"https://wheretheyrest.ca/#organization"},
         "areaServed": {"@type":"AdministrativeArea","name":"Greater Victoria, British Columbia"},
         "serviceType": ["Memorial care","Grave cleaning","Cemetery visits","Flower placement","Memorial photo updates"]
       },
