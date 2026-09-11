@@ -11,34 +11,35 @@ permissions:
   contents: write
 
 jobs:
-  install:
+  patch:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Rebuild image assets
+      - name: Patch homepage imagery
+        run: python tools/patch_realistic_memorial_images.py
+
+      - name: Validate visual replacement
         shell: bash
         run: |
           set -euo pipefail
-          cat staging/before.part00 staging/before.part01 staging/before.part02 staging/before.part03 > /tmp/before.b64
-          cat staging/after.part00 staging/after.part01 staging/after.part02 staging/after.part03 > /tmp/after.b64
-          test "$(wc -c < /tmp/before.b64)" -eq 13484
-          test "$(wc -c < /tmp/after.b64)" -eq 12064
-          base64 -d /tmp/before.b64 > assets/memorial-care-before.webp
-          base64 -d /tmp/after.b64 > assets/memorial-care-after.webp
-          test "$(wc -c < assets/memorial-care-before.webp)" -eq 10112
-          test "$(wc -c < assets/memorial-care-after.webp)" -eq 9048
-          test "$(head -c 4 assets/memorial-care-before.webp)" = 'RIFF'
-          test "$(head -c 4 assets/memorial-care-after.webp)" = 'RIFF'
+          test -f assets/memorial-care-before.webp
+          test -f assets/memorial-care-after.webp
+          grep -Fq 'assets/memorial-care-before.webp?v=20260911' index.html
+          grep -Fq 'assets/memorial-care-after.webp?v=20260911' index.html
+          grep -Fq 'Illustrative sample only.' index.html
+          grep -Fq 'realistic memorial comparison' trust.css
+          ! grep -Fq 'photo-placeholder before' index.html
+          ! grep -Fq 'grave-memorial-cleaning-before-after.jpg?v=20260911' index.html
 
-      - name: Commit image assets and remove staging files
+      - name: Commit homepage visual upgrade
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git rm -r staging
-          git add assets/memorial-care-before.webp assets/memorial-care-after.webp
-          git commit -m 'Add realistic illustrative memorial care images'
+          git rm tools/patch_realistic_memorial_images.py
+          git add index.html trust.css
+          git commit -m 'Use realistic before and after memorial imagery'
           git push
