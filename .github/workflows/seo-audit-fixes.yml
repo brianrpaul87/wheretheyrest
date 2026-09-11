@@ -1,0 +1,93 @@
+name: Apply one-time WTR SEO audit fixes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/seo-audit-fixes.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Apply exact SEO audit fixes
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected exactly one match, found {count}: {old[:80]}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          replace_once(
+              'index.html',
+              'Where They Rest provides respectful grave and memorial care for families who cannot visit in person, including memorial check-ins, cleaning, flowers, seasonal visits, and photo updates.',
+              'Respectful memorial care in Greater Victoria for families who cannot visit in person, with documented visits, flowers, cleaning and photo updates.'
+          )
+          replace_once(
+              'index.html',
+              '    "@type": "Organization",\n    "name": "Where They Rest Memorial Care",',
+              '    "@type": "Organization",\n    "@id": "https://wheretheyrest.ca/#organization",\n    "name": "Where They Rest Memorial Care",'
+          )
+          replace_once(
+              'index.html',
+              '    "url": "https://wheretheyrest.ca/",\n    "email": "hello@wheretheyrest.ca",',
+              '    "url": "https://wheretheyrest.ca/",\n    "logo": "https://wheretheyrest.ca/assets/logo-mark.svg",\n    "email": "hello@wheretheyrest.ca",'
+          )
+
+          replace_once(
+              'grave-cleaning-memorial-care-victoria-bc.html',
+              'Grave cleaning and memorial care in Greater Victoria, BC. Arrange documented cemetery visits, flowers, photo updates, light tending, and eligible memorial cleaning from a distance.',
+              'Grave cleaning and memorial care in Greater Victoria, BC, with documented visits, flowers, photo updates, light tending and eligible cleaning.'
+          )
+          replace_once(
+              'grave-cleaning-memorial-care-victoria-bc.html',
+              '<title>Grave Cleaning & Memorial Care in Victoria BC | Where They Rest</title>',
+              '<title>Grave Cleaning & Memorial Care Victoria BC | Where They Rest</title>'
+          )
+          replace_once(
+              'grave-cleaning-memorial-care-victoria-bc.html',
+              '        "@type": "Organization",\n        "name": "Where They Rest Memorial Care",',
+              '        "@type": "Organization",\n        "@id": "https://wheretheyrest.ca/#organization",\n        "name": "Where They Rest Memorial Care",'
+          )
+          replace_once(
+              'grave-cleaning-memorial-care-victoria-bc.html',
+              '        "url": "https://wheretheyrest.ca/",\n        "email": "hello@wheretheyrest.ca",',
+              '        "url": "https://wheretheyrest.ca/",\n        "logo": "https://wheretheyrest.ca/assets/logo-mark.svg",\n        "email": "hello@wheretheyrest.ca",'
+          )
+          replace_once(
+              'grave-cleaning-memorial-care-victoria-bc.html',
+              '        "provider": {"@type":"Organization","name":"Where They Rest Memorial Care"},',
+              '        "provider": {"@id":"https://wheretheyrest.ca/#organization"},'
+          )
+
+      - name: Validate exact results
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq '"logo": "https://wheretheyrest.ca/assets/logo-mark.svg"' index.html
+          grep -Fq '"@id": "https://wheretheyrest.ca/#organization"' index.html
+          grep -Fq '<title>Grave Cleaning & Memorial Care Victoria BC | Where They Rest</title>' grave-cleaning-memorial-care-victoria-bc.html
+          grep -Fq '"provider": {"@id":"https://wheretheyrest.ca/#organization"}' grave-cleaning-memorial-care-victoria-bc.html
+
+      - name: Commit SEO audit fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html grave-cleaning-memorial-care-victoria-bc.html
+          git diff --cached --quiet && { echo 'No changes required.'; exit 0; }
+          git commit -m 'Fix WTR on-page SEO audit warnings'
+          git push
