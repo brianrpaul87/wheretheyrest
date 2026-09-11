@@ -1,0 +1,24 @@
+Options -Indexes
+DirectoryIndex index.html
+
+# Where They Rest is a small static site that changes infrequently but must publish
+# edits immediately. Disable server-level LiteSpeed page caching for this directory.
+<IfModule LiteSpeed>
+  CacheDisable public /
+  CacheDisable private /
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(?:html|css|js|xml)$">
+    Header set Cache-Control "no-cache, must-revalidate, max-age=0"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^(?:config|tests|vendor)(?:/|$) - [F,L,NC]
+</IfModule>
+
+<FilesMatch "^(?:composer\.(?:json|lock)|README\.md|\.gitignore)$">
+  Require all denied
+</FilesMatch>
