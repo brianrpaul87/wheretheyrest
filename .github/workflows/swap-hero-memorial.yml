@@ -2,7 +2,8 @@ name: Swap WTR hero memorial
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - '.github/workflows/swap-hero-memorial.yml'
   workflow_dispatch:
@@ -18,8 +19,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Replace repeated hero memorial
-        shell: python
+        shell: bash
         run: |
+          set -euo pipefail
+          python - <<'PY'
           from pathlib import Path
           p = Path('index.html')
           text = p.read_text(encoding='utf-8')
@@ -38,19 +41,19 @@ jobs:
         <img src="assets/grave-memorial-cleaning-before-after.jpg?v=20260911-2" alt="Illustrative before-and-after example of a weathered cemetery memorial following careful cleaning">
         <div class="report-card"><span class="report-icon" aria-hidden="true">✓</span><div><strong>Illustrative sample</strong><span>Real visits are photo documented</span></div></div>
       </div>'''
-          if text.count(old) != 1:
-              raise SystemExit(f'Expected one hero block, found {text.count(old)}')
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'Expected one hero block, found {count}')
           p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
 
       - name: Validate distinct image usage
         shell: bash
         run: |
           set -euo pipefail
           grep -Fq 'assets/grave-memorial-cleaning-before-after.jpg?v=20260911-2' index.html
-          grep -Fq 'assets/memorial-care-before.webp?v=20260911' index.html
-          grep -Fq 'assets/memorial-care-after.webp?v=20260911' index.html
-          test "$(grep -o 'assets/memorial-care-before.webp?v=20260911' index.html | wc -l)" -eq 1
-          test "$(grep -o 'assets/memorial-care-after.webp?v=20260911' index.html | wc -l)" -eq 1
+          test "$(grep -oF 'assets/memorial-care-before.webp?v=20260911' index.html | wc -l)" -eq 1
+          test "$(grep -oF 'assets/memorial-care-after.webp?v=20260911' index.html | wc -l)" -eq 1
 
       - name: Commit hero image fix
         shell: bash
