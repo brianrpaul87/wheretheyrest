@@ -5,18 +5,14 @@
   const form = document.querySelector('[data-request-form]');
   const status = document.querySelector('[data-form-status]');
   const interest = document.querySelector('[data-interest]');
+  const submitButton = document.querySelector('[data-submit-button]');
   const year = document.querySelector('[data-year]');
 
-  if (year) {
-    year.textContent = new Date().getFullYear();
-  }
+  if (year) year.textContent = new Date().getFullYear();
 
   const updateHeader = () => {
-    if (header) {
-      header.classList.toggle('scrolled', window.scrollY > 12);
-    }
+    if (header) header.classList.toggle('scrolled', window.scrollY > 12);
   };
-
   updateHeader();
   window.addEventListener('scroll', updateHeader, { passive: true });
 
@@ -32,15 +28,12 @@
       menuToggle.setAttribute('aria-expanded', String(willOpen));
       nav.classList.toggle('open', willOpen);
     });
-
     nav.addEventListener('click', (event) => {
       if (event.target.closest('a')) closeMenu();
     });
-
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') closeMenu();
     });
-
     window.addEventListener('resize', () => {
       if (window.innerWidth > 820) closeMenu();
     });
@@ -53,33 +46,25 @@
     });
   });
 
-  if (form && status) {
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      status.textContent = '';
-      status.classList.remove('error');
+  const params = new URLSearchParams(window.location.search);
+  const success = params.get('status') === 'success' || params.get('success') === '1' || params.get('sent') === '1' || params.get('request') === 'sent';
+  const error = params.get('status') === 'error' || params.get('error') === '1' || params.get('request') === 'error';
 
-      const requiredFields = [...form.querySelectorAll('[required]')];
-      let firstInvalid = null;
+  if (status && success) {
+    status.textContent = 'Thank you. Your request was sent successfully. We will review the cemetery, local coverage, and the next step.';
+    status.classList.remove('error');
+    document.querySelector('#request-care')?.scrollIntoView({ block: 'start' });
+  } else if (status && error) {
+    status.textContent = 'Your request could not be sent. Please try again or email hello@wheretheyrest.ca.';
+    status.classList.add('error');
+    document.querySelector('#request-care')?.scrollIntoView({ block: 'start' });
+  }
 
-      requiredFields.forEach((field) => {
-        const valid = field.type === 'checkbox' ? field.checked : field.value.trim() !== '' && field.checkValidity();
-        field.setAttribute('aria-invalid', String(!valid));
-        if (!valid && !firstInvalid) firstInvalid = field;
-      });
-
-      if (firstInvalid) {
-        status.textContent = 'Please complete the required fields before previewing your request.';
-        status.classList.add('error');
-        firstInvalid.focus();
-        return;
-      }
-
-      const name = form.elements.name.value.trim();
-      const location = form.elements.location.value.trim();
-      status.textContent = `Thank you, ${name}. This preview request for ${location} is complete, but no information has been transmitted.`;
-      form.reset();
-      requiredFields.forEach((field) => field.removeAttribute('aria-invalid'));
+  if (form && submitButton) {
+    form.addEventListener('submit', () => {
+      if (!form.checkValidity()) return;
+      submitButton.disabled = true;
+      submitButton.textContent = 'Sending…';
     });
   }
 })();
