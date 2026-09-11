@@ -28,12 +28,15 @@
       menuToggle.setAttribute('aria-expanded', String(willOpen));
       nav.classList.toggle('open', willOpen);
     });
+
     nav.addEventListener('click', (event) => {
       if (event.target.closest('a')) closeMenu();
     });
+
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') closeMenu();
     });
+
     window.addEventListener('resize', () => {
       if (window.innerWidth > 820) closeMenu();
     });
@@ -46,25 +49,97 @@
     });
   });
 
-  const params = new URLSearchParams(window.location.search);
-  const success = params.get('status') === 'success' || params.get('success') === '1' || params.get('sent') === '1' || params.get('request') === 'sent';
-  const error = params.get('status') === 'error' || params.get('error') === '1' || params.get('request') === 'error';
+  if (!form || !status || !submitButton) return;
 
-  if (status && success) {
-    status.textContent = 'Thank you. Your request was sent successfully. We will review the cemetery, local coverage, and the next step.';
-    status.classList.remove('error');
-    document.querySelector('#request-care')?.scrollIntoView({ block: 'start' });
-  } else if (status && error) {
-    status.textContent = 'Your request could not be sent. Please try again or email hello@wheretheyrest.ca.';
-    status.classList.add('error');
-    document.querySelector('#request-care')?.scrollIntoView({ block: 'start' });
-  }
+  const startedAt = form.querySelector('[data-started-at]');
+  const page = form.querySelector('[data-page]');
+  const resetRuntimeFields = () => {
+    if (startedAt) startedAt.value = String(Date.now());
+    if (page) page.value = window.location.href.slice(0, 300);
+  };
+  resetRuntimeFields();
 
-  if (form && submitButton) {
-    form.addEventListener('submit', () => {
-      if (!form.checkValidity()) return;
-      submitButton.disabled = true;
-      submitButton.textContent = 'Sending…';
+  let submitting = false;
+
+  const setStatus = (message, type = '') => {
+    status.textContent = message;
+    status.classList.toggle('error', type === 'error');
+    status.classList.toggle('success', type === 'success');
+  };
+
+  const validate = () => {
+    const requiredFields = [...form.querySelectorAll('[required]')];
+    let firstInvalid = null;
+
+    requiredFields.forEach((field) => {
+      const valid = field.type === 'checkbox'
+        ? field.checked
+        : field.value.trim() !== '' && field.checkValidity();
+      field.setAttribute('aria-invalid', String(!valid));
+      if (!valid && !firstInvalid) firstInvalid = field;
     });
-  }
+
+    if (firstInvalid) {
+      setStatus('Please complete the required fields before sending your request.', 'error');
+      firstInvalid.focus();
+      return false;
+    }
+
+    return true;
+  };
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (submitting) return;
+
+    setStatus('');
+    if (!validate()) return;
+
+    submitting = true;
+    submitButton.disabled = true;
+    submitButton.textContent = 'Sending…';
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        body: new URLSearchParams(new FormData(form)),
+        credentials: 'same-origin',
+      });
+
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch {
+        payload = null;
+      }
+
+      if (!response.ok || !payload?.ok) {
+        const message = response.status === 429
+          ? 'Please wait a little before sending another request.'
+          : payload?.message || 'We could not send your request right now. Please email care@wheretheyrest.ca instead.';
+        throw new Error(message);
+      }
+
+      const name = form.elements.name.value.trim();
+      setStatus(`Thank you, ${name}. Your request was received. Reference: ${payload.reference}.`, 'success');
+      form.reset();
+      resetRuntimeFields();
+      form.querySelectorAll('[aria-invalid]').forEach((field) => field.removeAttribute('aria-invalid'));
+    } catch (error) {
+      setStatus(
+        error instanceof Error
+          ? error.message
+          : 'We could not send your request right now. Please email care@wheretheyrest.ca instead.',
+        'error',
+      );
+    } finally {
+      submitting = false;
+      submitButton.disabled = false;
+      submitButton.textContent = 'Send request';
+    }
+  });
 })();
