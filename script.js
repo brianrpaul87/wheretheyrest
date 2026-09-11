@@ -5,7 +5,7 @@
   const form = document.querySelector('[data-request-form]');
   const status = document.querySelector('[data-form-status]');
   const interest = document.querySelector('[data-interest]');
-  const submitButton = document.querySelector('[data-submit-button]');
+  const submitButton = document.querySelector('[data-submit-button]') || form?.querySelector('button[type="submit"]');
   const year = document.querySelector('[data-year]');
 
   if (year) year.textContent = new Date().getFullYear();
@@ -49,13 +49,51 @@
     });
   });
 
+  const heroImage = document.querySelector('.hero-visual img');
+  if (heroImage && heroImage.getAttribute('src')?.includes('memorial-before-after-side-by-side.jpg')) {
+    heroImage.setAttribute('src', 'assets/grave-memorial-cleaning-before-after.jpg');
+  }
+
   if (!form || !status || !submitButton) return;
 
-  const startedAt = form.querySelector('[data-started-at]');
-  const page = form.querySelector('[data-page]');
+  form.action = 'api/submit.php';
+  form.method = 'post';
+
+  const ensureHiddenInput = (name, datasetKey) => {
+    let input = form.querySelector(`input[name="${name}"]`);
+    if (!input) {
+      input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      form.appendChild(input);
+    }
+    if (datasetKey) input.dataset[datasetKey] = '';
+    return input;
+  };
+
+  const startedAt = ensureHiddenInput('started_at', 'startedAt');
+  const page = ensureHiddenInput('page', 'page');
+
+  let trap = form.querySelector('input[name="website"]');
+  if (!trap) {
+    trap = document.createElement('input');
+    trap.type = 'text';
+    trap.name = 'website';
+    trap.tabIndex = -1;
+    trap.autocomplete = 'off';
+    trap.setAttribute('aria-hidden', 'true');
+    trap.style.position = 'absolute';
+    trap.style.left = '-9999px';
+    trap.style.width = '1px';
+    trap.style.height = '1px';
+    trap.style.overflow = 'hidden';
+    form.appendChild(trap);
+  }
+
   const resetRuntimeFields = () => {
-    if (startedAt) startedAt.value = String(Date.now());
-    if (page) page.value = window.location.href.slice(0, 300);
+    startedAt.value = String(Date.now());
+    page.value = window.location.href.slice(0, 300);
+    trap.value = '';
   };
   resetRuntimeFields();
 
@@ -100,13 +138,17 @@
     submitButton.textContent = 'Sending…';
 
     try {
+      const body = new URLSearchParams(new FormData(form));
+      body.set('consent', 'on');
+      if (body.get('interest') === 'memorial-care') body.set('interest', 'single-visit');
+
       const response = await fetch(form.action, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
         },
-        body: new URLSearchParams(new FormData(form)),
+        body,
         credentials: 'same-origin',
       });
 
