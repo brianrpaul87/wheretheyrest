@@ -10,6 +10,9 @@
 
   if (year) year.textContent = new Date().getFullYear();
 
+  const heroEyebrow = document.querySelector('.hero-copy > .eyebrow');
+  if (heroEyebrow) heroEyebrow.textContent = 'Now accepting requests in Greater Victoria, BC';
+
   const updateHeader = () => {
     if (header) header.classList.toggle('scrolled', window.scrollY > 12);
   };
